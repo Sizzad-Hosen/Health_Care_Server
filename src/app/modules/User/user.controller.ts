@@ -5,11 +5,7 @@ import { UserService } from './user.service';
   const createAdmin =  async (req: Request, res: Response) => {
     try {
       const data = req.body; 
-
-
       const admin = await UserService.createAdmin(data);
-
-
       res.status(201).json(admin);
     } catch (error) {
       console.error(error);
