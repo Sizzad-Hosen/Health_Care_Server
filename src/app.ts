@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-import { UserRoutes } from "./app/modules/User/user.routes";
-import { AdminRoutes } from "./app/modules/Admin/admin.routes";
 
-
+import router from "./app/modules/routes";
+import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+import { notFoundHandler } from "./app/middlewares/notFound";
 const app = express();
 
 app.use(cors());
@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
   res.send({ message: "Health Care Server is running!" });
 });
 
-app.use("/api/v1", UserRoutes);
-app.use("/api/v1/admin", AdminRoutes);
-
+app.use("/api/v1", router);
+app.use(globalErrorHandler)
+app.use(notFoundHandler)
 export default app;

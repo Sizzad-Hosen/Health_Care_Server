@@ -4,10 +4,10 @@ import { AdminController } from "./admin.controller";
 const router = express.Router();
 
 // Use GET instead of POST
-router.get("/", AdminController.getAllDB);
-router.get("/:id", AdminController.getIdByDB);
-router.patch("/:id", AdminController.updateByIdInDB);
-router.delete("/:id", AdminController.deleteByIdInDB);
-router.delete("/soft/:id", AdminController.deleteByIdInDB);
+router.get("/", AdminController.getAllAdmins);
+router.get("/:id", AdminController.getAdminById);
+router.patch("/:id", AdminController.updateAdmin);
+router.delete("/:id", AdminController.deleteAdmin);
+router.delete("/soft/:id", AdminController.deleteAdmin);
 
 export const AdminRoutes = router;
