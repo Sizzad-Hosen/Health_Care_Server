@@ -15,6 +15,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", UserRoutes);
-app.use("/api/v1", AdminRoutes);
+app.use("/api/v1/admin", AdminRoutes);
 
 export default app;
