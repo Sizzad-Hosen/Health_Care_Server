@@ -7,7 +7,7 @@ import { catchAsync } from "../../../shared/catchAsync";
 
 const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminService.getAllFromDb(req.query, req.query);
-
+console.log(result)
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -64,6 +64,7 @@ const softDeleteAdmin = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 
 export const AdminController = {
   getAllAdmins,
