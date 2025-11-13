@@ -7,4 +7,6 @@ router.post("/login", AuthControllers.loginUser);
 
 router.post("/refreshtoken", AuthControllers.refreshToken);
 
+router.post("/change-password", AuthControllers.changePasword);
+
 export const LoginRoutes = router;

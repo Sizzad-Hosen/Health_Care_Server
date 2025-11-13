@@ -4,7 +4,7 @@ import { pagination } from "../../../helpars/paginationHelpers";
 import prisma from "../../../shared/prisma";
 import { IAdminFilterRequest } from "./admin.interface";
 import { IPagination } from "../../interface/pagination";
-
+import bcrypt from "bcryptjs";
 
 const getAllFromDb = async (params:IAdminFilterRequest, options:IPagination) => {
 const {searchTerm, ...filerData}= params;
@@ -158,11 +158,11 @@ const softDeleteByIdFromDB = async(id:string)=>{
 }
 
 
-
 export const AdminService = {
   getAllFromDb,
   getByIdFromDB,
   updateByIdDB,
   deleteByIdFromDB,
-  softDeleteByIdFromDB
+  softDeleteByIdFromDB,
+
 };

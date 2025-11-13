@@ -2,6 +2,15 @@ import { catchAsync } from "../../../shared/catchAsync";
 import { sendResponse } from "../../../shared/sendResponse";
 import { AuthServices} from "./auth.service";
 import httpStatus from "http-status";
+import { Request } from "express";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 const loginUser = catchAsync(async (req, res) => {
 
@@ -46,4 +55,19 @@ const refreshToken = catchAsync(async (req, res) => {
     })
 });
 
-export const AuthControllers = { loginUser, refreshToken };
+const changePasword = catchAsync(async (req, res) => {
+
+    
+  const user = req.user;
+console.log("user", user, req.body)
+    const result = await AuthServices.changePassword(user, req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Password Changed successfully",
+        data: result
+    })
+});
+
+export const AuthControllers = { loginUser, refreshToken, changePasword };
