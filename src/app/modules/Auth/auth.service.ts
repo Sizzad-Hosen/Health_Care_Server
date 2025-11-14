@@ -3,8 +3,12 @@ import { UserStatus } from "@prisma/client";
 import { generateToken, verifyToken } from "../../../helpars/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import bcrypt from "bcryptjs";
+import httpStatus from "http-status";
+import { Secret } from "jsonwebtoken";
 
 import config from "../../config";
+import emailSender from "./emailSender";
+import ApiError from "../../errors/ApiError";
 
 const login = async (payload: { email: string; password: string }) => {
 
@@ -31,7 +35,7 @@ const login = async (payload: { email: string; password: string }) => {
   };
   
   const accessToken = generateToken(jwtPayload,config.jwt.jwt_secret,config.jwt.expires_in);
-  
+
   console.log("🔹 LOGIN ACCESS SECRET:", config.jwt.jwt_secret);
   console.log("🔹 LOGIN REFRESH SECRET:", config.jwt.refresh_token_secret);
   console.log("🔹 GENERATED ACCESS TOKEN:", accessToken);
@@ -104,16 +108,6 @@ const changePassword = async (user: any, payload: any) => {
         where: {
             email: userData.email,
             status:UserStatus.ACTIVE
-
-
-
-
-
-
-
-
-
-
         },
         data: {
             password: hashedPassword,
@@ -125,5 +119,68 @@ const changePassword = async (user: any, payload: any) => {
         message: "Password changed successfully!"
     }
 };
+const forgotPassword = async ( payload:{email:string}) => {
 
-export const AuthServices = { login , refreshToken, changePassword};
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            email: payload.email,
+            status: UserStatus.ACTIVE
+        }
+    });
+
+    const jwtPayload= {
+      email:userData.email,
+      role:userData.role
+    }
+
+    const resetPassword = generateToken(
+      jwtPayload,
+     config.jwt.reset_pass_secret,
+    config.jwt.reset_pass_expires_in
+    )
+const resetPassLink = config.reset_pass_link + `?userId=${userData.id}&token=${resetPassword}`
+  await emailSender(
+        userData.email,
+        `
+        <div>
+            <p>Dear User,</p>
+            <p>Your password reset link 
+                <a href=${resetPassLink}>
+                    <button>
+                        Reset Password
+                    </button>
+                </a>
+            </p>
+
+        </div>
+        `
+    )
+}
+
+export const resetPassword = async (
+  token: string,
+  payload: { password: string }
+) => {
+  let decoded: any;
+
+  try {
+    // ✅ Use RESET_PASS_TOKEN secret here, NOT login/access secret
+    decoded = verifyToken(token, config.jwt.reset_pass_secret);
+  } catch (err) {
+    throw new ApiError(httpStatus.FORBIDDEN, "Invalid or expired reset token");
+  }
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { email: decoded.email, status: UserStatus.ACTIVE },
+  });
+
+  const hashedPassword = await bcrypt.hash(payload.password, Number(config.salt_round));
+
+  await prisma.user.update({
+    where: { email: decoded.email },
+    data: { password: hashedPassword, needPasswordChange: false },
+  });
+
+  return { message: "Password reset successfully!" };
+};
+export const AuthServices = { login , refreshToken, changePassword , forgotPassword , resetPassword};

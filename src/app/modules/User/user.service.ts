@@ -1,39 +1,58 @@
 
 
-import { UserRole } from "@prisma/client";
+import { Admin, UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { Request } from "express";
 import prisma from "../../../shared/prisma";
+import { IFile } from "../../interface/file";
+import { fileUploader } from "../../../helpars/fileUploder";
+
+interface CreateAdminRequest extends Request {
+    body: {
+        admin: {
+            name: string;
+            contactNumber: string;
+            email: string;
+            profilePhoto?: string;
+            [key: string]: any;
+        };
+        password: string;
+    };
+}
+
+const createAdmin = async (req: CreateAdminRequest): Promise<Admin> => {
+
+    const file = req.file as IFile;
 
 
-const createAdmin = async (data: any) => {
-  // Hash the password
-  const passwordHash = await bcrypt.hash(data.password, 10);
+    console.log('file', file)
 
-  const result = await prisma.$transaction(async (tx) => {
-  
-    const user = await tx.user.create({
-      data: {
-        email: data.admin.email,
-        password: passwordHash,
-        role: UserRole.SUPER_ADMIN, 
-      },
+    if (file) {
+        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+        req.body.admin.profilePhoto = uploadToCloudinary?.secure_url
+    }
+
+    const hashedPassword: string = await bcrypt.hash(req.body.password, 12)
+
+    const userData = {
+        email: req.body.admin.email,
+        password: hashedPassword,
+        role: UserRole.ADMIN
+    }
+
+    const result = await prisma.$transaction(async (transactionClient) => {
+        await transactionClient.user.create({
+            data: userData
+        });
+
+        const createdAdminData = await transactionClient.admin.create({
+            data: req.body.admin
+        });
+
+        return createdAdminData;
     });
 
-  
-    const admin = await tx.admin.create({
-      data: {
-        name: data.admin.name,
-        contactNumber: data.admin.contactNumber,
-        user: {
-          connect: { id: user.id }
-        }
-      },
-    });
-
-    return { user, admin };
-  });
-
-  return result;
+    return result;
 };
 
 export const UserService = {

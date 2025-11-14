@@ -1,8 +1,8 @@
 import { catchAsync } from "../../../shared/catchAsync";
 import { sendResponse } from "../../../shared/sendResponse";
+import ApiError from "../../errors/ApiError";
 import { AuthServices} from "./auth.service";
 import httpStatus from "http-status";
-import { Request } from "express";
 
 declare global {
   namespace Express {
@@ -69,5 +69,41 @@ console.log("user", user, req.body)
         data: result
     })
 });
+const forgotPasword = catchAsync(async (req, res) => {
 
-export const AuthControllers = { loginUser, refreshToken, changePasword };
+   await AuthServices.forgotPassword( req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Please check email sent a reset link",
+        data: null
+    })
+});
+
+export const resetPassword = catchAsync(async (req, res) => {
+  let token = req.headers.authorization || req.body.token;
+
+  if (!token) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Reset token is required");
+  }
+
+  if (token.startsWith("Bearer ")) {
+    token = token.split(" ")[1];
+  }
+
+  console.log("Reset Token:", token);
+  console.log("Request Body:", req.body);
+
+  await AuthServices.resetPassword(token, req.body); // <-- service must verify with reset secret
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset successfully!",
+    data: null,
+  });
+});
+
+
+export const AuthControllers = { loginUser, refreshToken, resetPassword,changePasword , forgotPasword};
