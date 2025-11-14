@@ -29,8 +29,12 @@ const login = async (payload: { email: string; password: string }) => {
     email: user.email,
     role: user.role,
   };
-
+  
   const accessToken = generateToken(jwtPayload,config.jwt.jwt_secret,config.jwt.expires_in);
+  
+  console.log("🔹 LOGIN ACCESS SECRET:", config.jwt.jwt_secret);
+  console.log("🔹 LOGIN REFRESH SECRET:", config.jwt.refresh_token_secret);
+  console.log("🔹 GENERATED ACCESS TOKEN:", accessToken);
 
   const refreshToken = generateToken(jwtPayload,config.jwt.refresh_token_secret,config.jwt.refresh_token_expires_in);
   return {
@@ -98,7 +102,18 @@ const changePassword = async (user: any, payload: any) => {
 
     await prisma.user.update({
         where: {
-            email: userData.email
+            email: userData.email,
+            status:UserStatus.ACTIVE
+
+
+
+
+
+
+
+
+
+
         },
         data: {
             password: hashedPassword,

@@ -4,6 +4,6 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.post('/',auth('SUPER_ADMIN'), UserControllers.createAdmin);
+router.post('/', UserControllers.createAdmin);
 
 export const UserRoutes = router;

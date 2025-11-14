@@ -1,38 +1,55 @@
 import { NextFunction, Request, Response } from "express";
-import config from "../config";
+
+import { Secret } from "jsonwebtoken";
+import ApiError from "../errors/ApiError";
 import httpStatus from "http-status";
 import { verifyToken } from "../../helpars/jwtHelpers";
-import ApiError from "../errors/ApiError";
+import config from "../config";
 
-const auth =
-  (...roles: string[]) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const authHeader = req.header("authorization");
 
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-     throw new ApiError(httpStatus.FORBIDDEN, "Your are not authorize!!")
-      }
+const auth = (...roles: string[]) => {
+    return async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+        try {
+            // const token = req.headers.authorization
+            
+            // if (!token) {
+              //     throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!")
+              // }
+              
+              const authHeader = req.headers.authorization;
+              
+              if (!authHeader || !authHeader.startsWith("Bearer ")) {
+                throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
+              }
+              
+              const token = authHeader.split(" ")[1];  // <-- FIXED
+              
+               console.log('tokern', token)
+               
+                           console.log("🔹 AUTH TOKEN:", req.header("authorization"));
+                           console.log("🔹 AUTH ACCESS SECRET:", config.jwt.jwt_secret);
 
-      const token = authHeader.split(" ")[1];
 
-      const decodedToken = await verifyToken(token, config.jwt.jwt_secret as string);
+            const verifiedUser = await verifyToken(token, config.jwt.jwt_secret as Secret)
 
-      if (roles.length && !roles.includes(decodedToken.role)) {
-     throw new ApiError(httpStatus.FORBIDDEN, "Your are not authorize!!")
-      }
+             console.log('verifytoekn', verifiedUser)
 
-      // attach user info to request (optional)
-      req.user = decodedToken;
 
-      next();
-    } catch (error: any) {
-     
-        throw new ApiError(httpStatus.FORBIDDEN,"Invalid or expired token")
-    
-  };
+            req.user = verifiedUser;
 
-}
 
-export default auth
 
+
+
+            if (roles.length && !roles.includes(verifiedUser.role)) {
+                throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!")
+            }
+            next()
+        }
+        catch (err) {
+            next(err)
+        }
+    }
+};
+
+export default auth;

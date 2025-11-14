@@ -1,5 +1,7 @@
 import express from "express";
 import { AuthControllers } from "./auth.controller";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 
 const router = express.Router();
 
@@ -7,6 +9,11 @@ router.post("/login", AuthControllers.loginUser);
 
 router.post("/refreshtoken", AuthControllers.refreshToken);
 
-router.post("/change-password", AuthControllers.changePasword);
+router.post("/change-password", auth(
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.DOCTOR,
+        UserRole.PATIENT
+    ), AuthControllers.changePasword);
 
 export const LoginRoutes = router;

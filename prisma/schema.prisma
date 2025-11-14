@@ -44,4 +44,5 @@ enum UserRole {
   SUPER_ADMIN
   DOCTOR
   PATIENT
+  ADMIN
 }
