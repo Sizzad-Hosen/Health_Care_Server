@@ -21,6 +21,42 @@ model Admin {
   user           User     @relation(fields: [email], references: [email])
 }
 
+model Doctor {
+  id                  String   @id @default(uuid())
+  name                String
+  email               String   @unique
+  profilePhoto        String?
+  contactNumber       String
+  address             String?
+  registrationNumber  String
+  experience          Int?
+  gender              Gender
+  appointmentFee      Int
+  qualification       String
+  currentWorkingPlace String
+  designation         String
+  isDeleted           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model Patient {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  profilePhoto   String?
+  contactNumber  String
+  isDeleted      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+}
+
 model User {
   id                  String     @id @default(uuid())
   email               String     @unique

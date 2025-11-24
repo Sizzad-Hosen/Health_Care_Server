@@ -22,6 +22,10 @@ export default {
 reset_pass_link:process.env.RESET_PASS_URL,
 email:process.env.EMAIL,
 app_pass:process.env.APP_PASS,
-salt_round:process.env.SALT_ROUND
+salt_round:process.env.SALT_ROUND,
+cloudinary_name:process.env.CLOUDINARY_CLOUD_NAME,
+cloudinary_api_key:process.env.CLOUDINARY_API_KEY,
+cloudinary_api_secret:process.env.CLOUDINARY_API_SECRET,
+
 
 }

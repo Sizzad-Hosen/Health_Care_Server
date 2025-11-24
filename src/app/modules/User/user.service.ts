@@ -1,38 +1,22 @@
-
-
-import { Admin, UserRole } from "@prisma/client";
+import { Admin, Doctor, UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { Request } from "express";
 import prisma from "../../../shared/prisma";
-import { IFile } from "../../interface/file";
 import { fileUploader } from "../../../helpars/fileUploder";
-
-interface CreateAdminRequest extends Request {
-    body: {
-        admin: {
-            name: string;
-            contactNumber: string;
-            email: string;
-            profilePhoto?: string;
-            [key: string]: any;
-        };
-        password: string;
-    };
-}
-
-const createAdmin = async (req: CreateAdminRequest): Promise<Admin> => {
-
-    const file = req.file as IFile;
+import { Request } from "express";
+import { IFile } from "../../interface/file";
+import config from "../../config";
 
 
-    console.log('file', file)
+const createAdmin = async (req: Request): Promise<Admin> => {
+
+    const file = req.file;
 
     if (file) {
         const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
         req.body.admin.profilePhoto = uploadToCloudinary?.secure_url
     }
 
-    const hashedPassword: string = await bcrypt.hash(req.body.password, 12)
+    const hashedPassword: string = await bcrypt.hash(req.body.password, Number(config.salt_round))
 
     const userData = {
         email: req.body.admin.email,
@@ -55,6 +39,37 @@ const createAdmin = async (req: CreateAdminRequest): Promise<Admin> => {
     return result;
 };
 
-export const UserService = {
-  createAdmin,
+
+
+
+const createDoctor = async (req: Request): Promise<Doctor> => {
+
+    const file = req.file;
+
+    if (file) {
+        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
+        req.body.doctor.profilePhoto = uploadToCloudinary?.secure_url
+    }
+    const hashedPassword: string = await bcrypt.hash(req.body.password, Number(config.salt_round))
+
+    const userData = {
+        email: req.body.doctor.email,
+        password: hashedPassword,
+        role: UserRole.DOCTOR
+    }
+
+    const result = await prisma.$transaction(async (transactionClient) => {
+        await transactionClient.user.create({
+            data: userData
+        });
+
+        const createdDoctorData = await transactionClient.doctor.create({
+            data: req.body.doctor
+        });
+
+        return createdDoctorData;
+    });
+
+    return result;
 };
+export const UserServices = { createAdmin, createDoctor };
