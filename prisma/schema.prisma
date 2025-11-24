@@ -2,27 +2,64 @@ generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
 
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  DOCTOR
+  PATIENT
+  ADMIN
+}
+model User {
+  id                 String     @id @default(uuid())
+  email              String     @unique
+  password           String
+  role               UserRole
+  needPasswordChange Boolean    @default(false)
+  status             UserStatus @default(ACTIVE)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // One-to-one relations
+  admin     Admin?   @relation("UserAdmin", fields: [adminId], references: [id])
+  doctor    Doctor?  @relation("UserDoctor", fields: [doctorId], references: [id])
+  patient   Patient? @relation("UserPatient", fields: [patientId], references: [id])
+
+  adminId   String?  @unique
+  doctorId  String?  @unique
+  patientId String?  @unique
+}
 
 model Admin {
-  id             String   @id @default(uuid())
-  name           String
-  email          String   @unique
-  profilePhoto   String?
-  contactNumber  String
-  isDeleted      Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [email], references: [email])
+  id            String   @id @default(uuid())
+  user          User?    @relation("UserAdmin")
+  name          String
+  email         String   @unique
+  profilePhoto  String?
+  contactNumber String
+  isDeleted     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Doctor {
   id                  String   @id @default(uuid())
+  user                User?    @relation("UserDoctor")
   name                String
   email               String   @unique
   profilePhoto        String?
@@ -40,45 +77,16 @@ model Doctor {
   updatedAt           DateTime @updatedAt
 }
 
-enum Gender {
-  MALE
-  FEMALE
-}
-
 model Patient {
-  id             String   @id @default(uuid())
-  name           String
-  email          String   @unique
-  profilePhoto   String?
-  contactNumber  String
-  isDeleted      Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-}
-
-model User {
-  id                  String     @id @default(uuid())
-  email               String     @unique
-  password            String
-  role                UserRole
-  needPasswordChange  Boolean    @default(false)
-  status              UserStatus @default(ACTIVE)
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
-
-  admin               Admin?
-}
-
-enum UserStatus {
-  ACTIVE
-  BLOCKED
-  DELETED
-}
-
-enum UserRole {
-  SUPER_ADMIN
-  DOCTOR
-  PATIENT
-  ADMIN
+  id            String   @id @default(uuid())
+  user          User?    @relation("UserPatient")
+  name          String
+  email         String   @unique
+  profilePhoto  String?
+  contactNumber String
+  address       String?
+  gender        Gender?
+  isDeleted     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
