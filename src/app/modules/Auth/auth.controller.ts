@@ -15,7 +15,7 @@ declare global {
 const loginUser = catchAsync(async (req, res) => {
 
     
-  const result = await AuthServices.login(req.body);
+  const result = await AuthServices.loginUser(req.body);
 console.log("result", result)
   const { refreshToken } = result;
 
@@ -82,7 +82,11 @@ const forgotPasword = catchAsync(async (req, res) => {
 });
 
 export const resetPassword = catchAsync(async (req, res) => {
+
+
   let token = req.headers.authorization || req.body.token;
+
+  console.log("Authorization Header:", req.headers.authorization);
 
   if (!token) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Reset token is required");
@@ -92,7 +96,7 @@ export const resetPassword = catchAsync(async (req, res) => {
     token = token.split(" ")[1];
   }
 
-  console.log("Reset Token:", token);
+  console.log("Reset Token body:", token);
   console.log("Request Body:", req.body);
 
   await AuthServices.resetPassword(token, req.body); // <-- service must verify with reset secret

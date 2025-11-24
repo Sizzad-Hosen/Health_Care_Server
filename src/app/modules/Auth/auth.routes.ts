@@ -17,6 +17,8 @@ router.post("/change-password", auth(
         UserRole.DOCTOR,
         UserRole.PATIENT
     ), AuthControllers.changePasword);
+
+    
 router.post(
     '/reset-password',
     AuthControllers.resetPassword
