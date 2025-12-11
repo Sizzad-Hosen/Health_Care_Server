@@ -24,14 +24,21 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
             id: payload.doctorId
         }
     });
+const schedule = await prisma.doctorSchedules.findFirst({
+  where: {
+    doctorId: doctorData.id,
+    scheduleId: payload.scheduleId,
+    isBooked: false
+  }
+});
 
-    await prisma.doctorSchedules.findFirstOrThrow({
-        where: {
-            doctorId: doctorData.id,
-            scheduleId: payload.scheduleId,
-            isBooked: false
-        }
-    });
+if (!schedule) {
+  throw new ApiError(404, "Doctor schedule not found or already booked!");
+}
+
+console.log("Schedule found:", schedule);
+
+
 
     const videoCallingId: string = uuidv4();
 

@@ -8,24 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Gender {
-  MALE
-  FEMALE
-}
-
-enum UserStatus {
-  ACTIVE
-  BLOCKED
-  DELETED
-}
-
-enum UserRole {
-  SUPER_ADMIN
-  DOCTOR
-  PATIENT
-  ADMIN
-}
-
 model User {
   id                 String     @id @default(uuid())
   email              String     @unique
@@ -79,6 +61,8 @@ model Doctor {
   doctorSpecialties   DoctorSpecialties[]
   doctorSchedules     DoctorSchedules[]
   appointments        Appointment[]
+  prescriptions       Prescription[]
+  reviews             Review[]
 }
 
 model Patient {
@@ -97,6 +81,8 @@ model Patient {
   patientHealthData PatientHealthData?
   medicalReports    MedicalReport[]
   appointments      Appointment[]
+  prescriptions     Prescription[]
+  reviews           Review[]
 }
 
 model Specialties {
@@ -147,22 +133,6 @@ model PatientHealthData {
   updatedAt           DateTime      @updatedAt
 
   @@map("patient_health_data")
-}
-
-enum MaritalStatus {
-  MARRIED
-  UNMARRIED
-}
-
-enum BloodGroup {
-  A_POSITIVE
-  A_NEGATIVE
-  B_POSITIVE
-  B_NEGATIVE
-  AB_POSITIVE
-  AB_NEGATIVE
-  O_POSITIVE
-  O_NEGATIVE
 }
 
 model MedicalReport {
@@ -225,6 +195,8 @@ model Appointment {
   updatedAt       DateTime          @updatedAt
   doctorSchedules DoctorSchedules?
   payment         Payment?
+  prescription    Prescription?
+  review          Review?
 
   @@map("appointments")
 }
@@ -244,6 +216,44 @@ model Payment {
   @@map("payments")
 }
 
+model Prescription {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  instructions String
+  followUpDate DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("prescriptions")
+}
+
+model Review {
+  id        String  @id @default(uuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+
+  rating    Float
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
 enum AppointmentStatus {
   SCHEDULED
   INPROGRESS
@@ -254,4 +264,38 @@ enum AppointmentStatus {
 enum PaymentStatus {
   PAID
   UNPAID
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  DOCTOR
+  PATIENT
+  ADMIN
+}
+
+enum MaritalStatus {
+  MARRIED
+  UNMARRIED
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
 }
