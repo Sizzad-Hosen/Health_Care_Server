@@ -9,7 +9,7 @@ import { IPaginationOptions } from "../../interface/pagination";
 
 
 const insertIntoDB = async (user: IAuthUser, payload: Partial<Prescription>) => {
-    const appointmentData = await prisma.appointment.findUniqueOrThrow({
+    const appointmentData = await prisma.appointment.findFirst({
         where: {
             id: payload.appointmentId,
             status: AppointmentStatus.COMPLETED,
@@ -19,6 +19,8 @@ const insertIntoDB = async (user: IAuthUser, payload: Partial<Prescription>) => 
             doctor: true
         }
     });
+
+    console.log(appointmentData);
 
     if (!(user?.email === appointmentData.doctor.email)) {
         throw new ApiError(httpStatus.BAD_REQUEST, "This is not your appointment!")
