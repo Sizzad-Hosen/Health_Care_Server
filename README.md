@@ -2,6 +2,40 @@
 
 A TypeScript backend API for a health care appointment platform. The system supports user authentication, doctors, patients, schedules, appointments, prescriptions, reviews, payments, file uploads, and admin workflows.
 
+## Project Problem
+
+Many health care services still depend on manual appointment booking, phone calls, scattered patient records, and disconnected payment workflows. This creates several problems:
+
+- Patients cannot easily find available doctors and book appointments online.
+- Doctors need a structured way to manage schedules and patient appointments.
+- Admin teams need controlled access to manage doctors, patients, specialties, and platform data.
+- Prescriptions, reviews, and appointment history need to be connected to the correct patient and doctor.
+- Payment processing needs to be integrated with appointment workflows.
+- File uploads such as profile photos, medical documents, and specialty icons need safe storage.
+- Backend code needs to be maintainable, testable, and production-ready as the platform grows.
+
+## My Solution
+
+I built a modular Express.js and TypeScript backend that provides the core API layer for a digital health care platform.
+
+My solution includes:
+
+- JWT-based authentication and role-based route protection.
+- User, admin, doctor, and patient management APIs.
+- Doctor schedule and appointment booking workflows.
+- Prescription and review management.
+- Payment initialization and validation through SSLCommerz.
+- File upload support using Multer and Cloudinary.
+- PostgreSQL database access through Prisma ORM.
+- Zod-based environment validation to catch missing configuration early.
+- Centralized error handling for consistent API responses.
+- Health check endpoint for deployment monitoring.
+- Graceful shutdown with Prisma disconnect.
+- Unit and API smoke tests to protect key behavior.
+- Incremental refactoring toward controller-service-repository architecture.
+
+This project is not only a feature implementation. It also shows how an older Express backend can be improved step-by-step without breaking existing API behavior.
+
 ## Project Purpose
 
 This backend solves the core API needs of a digital health care platform:
