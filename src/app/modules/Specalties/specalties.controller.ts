@@ -4,11 +4,16 @@ import httpStatus from "http-status";
 import { SpecialtiesService } from "./specalties.service";
 import { catchAsync } from "../../../shared/catchAsync";
 import { sendResponse } from "../../../shared/sendResponse";
+import { SpecialtyUploadFile } from "./specalties.types";
+import { fileUploader } from "../../../helpars/fileUploder";
 
 
 const inserIntoDB = catchAsync(async (req: Request, res: Response) => {
-    console.log(req.body)
-    const result = await SpecialtiesService.inserIntoDB(req);
+    const result = await SpecialtiesService.inserIntoDB(
+        req.body,
+        req.file as SpecialtyUploadFile,
+        fileUploader.uploadToCloudinary
+    );
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

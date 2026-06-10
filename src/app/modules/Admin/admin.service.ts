@@ -1,14 +1,14 @@
 import { Admin, Prisma, UserStatus } from "@prisma/client";
 import { adminSearchAbleFields } from "./admin.constant";
-import { pagination } from "../../../helpars/paginationHelpers";
+import { paginationHelper } from "../../../helpars/paginationHelpers";
 import prisma from "../../../shared/prisma";
 import { IAdminFilterRequest } from "./admin.interface";
-import { IPagination } from "../../interface/pagination";
+import { IPaginationOptions } from "../../interface/pagination";
 import bcrypt from "bcryptjs";
 
-const getAllFromDb = async (params:IAdminFilterRequest, options:IPagination) => {
+const getAllFromDb = async (params:IAdminFilterRequest, options:IPaginationOptions) => {
 const {searchTerm, ...filerData}= params;
-const {limit,page,skip}=pagination.calculatePagination(options)
+const {limit,page,skip}=paginationHelper.calculatePagination(options)
 
 const andContidions= [];
 

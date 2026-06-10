@@ -1,42 +1,44 @@
-import { Request } from "express";
-
-import prisma from "../../../shared/prisma";
-
 import { Specialties } from "@prisma/client";
-import { IFile } from "../../interface/file";
-import { fileUploader } from "../../../helpars/fileUploder";
+import { SpecialtiesRepository as defaultRepository } from "./specalties.repository";
+import {
+    CreateSpecialtyPayload,
+    SpecialtiesRepository,
+    SpecialtyUploadFile,
+    SpecialtyUploader,
+} from "./specalties.types";
 
-const inserIntoDB = async (req: Request) => {
+export const createSpecialtiesService = (
+    repository: SpecialtiesRepository = defaultRepository,
+    uploadToCloudinary?: SpecialtyUploader
+) => {
+    const inserIntoDB = async (
+        payload: CreateSpecialtyPayload,
+        file?: SpecialtyUploadFile,
+        uploader: SpecialtyUploader | undefined = uploadToCloudinary
+    ): Promise<Specialties> => {
+        const data = { ...payload };
 
-    const file = req.file as IFile;
+        if (file && uploader) {
+            const uploadToCloudinaryResult = await uploader(file);
+            data.icon = uploadToCloudinaryResult?.secure_url;
+        }
 
-    if (file) {
-        const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
-        req.body.icon = uploadToCloudinary?.secure_url;
-    }
+        return repository.create(data);
+    };
 
-    const result = await prisma.specialties.create({
-        data: req.body
-    });
+    const getAllFromDB = async (): Promise<Specialties[]> => {
+        return repository.findAll();
+    };
 
-    return result;
+    const deleteFromDB = async (id: string): Promise<Specialties> => {
+        return repository.deleteById(id);
+    };
+
+    return {
+        inserIntoDB,
+        getAllFromDB,
+        deleteFromDB,
+    };
 };
 
-const getAllFromDB = async (): Promise<Specialties[]> => {
-    return await prisma.specialties.findMany();
-}
-
-const deleteFromDB = async (id: string): Promise<Specialties> => {
-    const result = await prisma.specialties.delete({
-        where: {
-            id,
-        },
-    });
-    return result;
-};
-
-export const SpecialtiesService = {
-    inserIntoDB,
-    getAllFromDB,
-    deleteFromDB
-}
+export const SpecialtiesService = createSpecialtiesService();
