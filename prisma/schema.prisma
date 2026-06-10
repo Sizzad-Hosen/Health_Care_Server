@@ -254,6 +254,19 @@ model Review {
   @@map("reviews")
 }
 
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      String    @default("pending")
+  priority    String    @default("medium")
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("tasks")
+}
+
 enum AppointmentStatus {
   SCHEDULED
   INPROGRESS

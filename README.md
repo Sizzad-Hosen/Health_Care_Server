@@ -193,6 +193,7 @@ Registered module routes:
 /api/v1/payments
 /api/v1/prescriptions
 /api/v1/reviews
+/api/v1/tasks
 ```
 
 Note: `/specalties` keeps the current spelling to preserve existing API compatibility.
@@ -235,6 +236,7 @@ Before production deployment:
 - Set `NODE_ENV=production`.
 - Provide all required environment variables.
 - Run Prisma migrations.
+- Run `npx prisma migrate deploy` after pulling schema changes such as the `tasks` table.
 - Configure trusted CORS origins.
 - Remove sensitive debug logs.
 - Add rate limiting and security headers.
