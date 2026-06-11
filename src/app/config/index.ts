@@ -7,7 +7,13 @@ dotenv.config({ path: path.join(process.cwd(), ".env") });
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(5000),
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  DATABASE_URL: z
+    .string()
+    .min(1, "DATABASE_URL is required")
+    .refine(
+      (value) => !value.includes("USER:PASSWORD"),
+      "DATABASE_URL still contains placeholder credentials"
+    ),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   EXPIRE_IN: z.string().min(1, "EXPIRE_IN is required"),
   REFRESH_TOKEN_SECRET: z.string().min(1, "REFRESH_TOKEN_SECRET is required"),
