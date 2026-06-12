@@ -4,7 +4,6 @@ import { paginationHelper } from "../../../helpars/paginationHelpers";
 import prisma from "../../../shared/prisma";
 import { IAdminFilterRequest } from "./admin.interface";
 import { IPaginationOptions } from "../../interface/pagination";
-import bcrypt from "bcryptjs";
 
 const getAllFromDb = async (params:IAdminFilterRequest, options:IPaginationOptions) => {
 const {searchTerm, ...filerData}= params;

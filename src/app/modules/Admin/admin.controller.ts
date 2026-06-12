@@ -3,11 +3,14 @@ import httpStatus from "http-status";
 import { AdminService } from "./admin.service";
 import { sendResponse } from "../../../shared/sendResponse";
 import { catchAsync } from "../../../shared/catchAsync";
+import pick from "../../../shared/pick";
 
 
 const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminService.getAllFromDb(req.query, req.query);
-console.log(result)
+  const filters = pick(req.query, ["searchTerm", "name", "email", "contactNumber"]);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+  const result = await AdminService.getAllFromDb(filters, options);
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
