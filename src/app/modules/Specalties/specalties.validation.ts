@@ -6,6 +6,13 @@ const create = z.object({
     })
 });
 
+const update = z.object({
+    title: z.string({
+        message: "Title is required!"
+    }).min(1, "Title is required!")
+});
+
 export const SpecialtiesValidtaion = {
-    create
+    create,
+    update
 }

@@ -33,6 +33,23 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const updateIntoDB = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await SpecialtiesService.updateIntoDB(
+        id,
+        req.body,
+        req.file as SpecialtyUploadFile,
+        fileUploader.uploadToCloudinary
+    );
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Specialty updated successfully!",
+        data: result
+    });
+});
+
 const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await SpecialtiesService.deleteFromDB(id);
@@ -47,5 +64,6 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
 export const SpecialtiesController = {
     inserIntoDB,
     getAllFromDB,
+    updateIntoDB,
     deleteFromDB
 };

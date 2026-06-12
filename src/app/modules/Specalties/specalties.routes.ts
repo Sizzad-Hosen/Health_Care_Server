@@ -24,10 +24,21 @@ router.get(
 
 router.post(
     '/',
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
     fileUploader.upload.single('file'),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = SpecialtiesValidtaion.create.parse(JSON.parse(req.body.data))
         return SpecialtiesController.inserIntoDB(req, res, next)
+    }
+);
+
+router.patch(
+    '/:id',
+    auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    fileUploader.upload.single('file'),
+    (req: Request, res: Response, next: NextFunction) => {
+        req.body = SpecialtiesValidtaion.update.parse(JSON.parse(req.body.data))
+        return SpecialtiesController.updateIntoDB(req, res, next)
     }
 );
 

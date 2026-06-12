@@ -12,5 +12,6 @@ export type ScheduleRepository = {
     ): Promise<Schedule[]>;
     count(where: Prisma.ScheduleWhereInput): Promise<number>;
     findById(id: string): Promise<Schedule | null>;
+    updateById(id: string, data: Prisma.ScheduleUpdateInput): Promise<Schedule>;
     deleteById(id: string): Promise<Schedule>;
 };

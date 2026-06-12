@@ -16,11 +16,15 @@ export const createSpecialtiesService = (
         file?: SpecialtyUploadFile,
         uploader: SpecialtyUploader | undefined = uploadToCloudinary
     ): Promise<Specialties> => {
-        const data = { ...payload };
+        const data: CreateSpecialtyPayload = { ...payload, icon: payload.icon ?? "" };
 
         if (file && uploader) {
-            const uploadToCloudinaryResult = await uploader(file);
-            data.icon = uploadToCloudinaryResult?.secure_url;
+            try {
+                const uploadToCloudinaryResult = await uploader(file);
+                data.icon = uploadToCloudinaryResult?.secure_url ?? "";
+            } catch {
+                data.icon = "";
+            }
         }
 
         return repository.create(data);
@@ -30,6 +34,28 @@ export const createSpecialtiesService = (
         return repository.findAll();
     };
 
+    const updateIntoDB = async (
+        id: string,
+        payload: CreateSpecialtyPayload,
+        file?: SpecialtyUploadFile,
+        uploader: SpecialtyUploader | undefined = uploadToCloudinary
+    ): Promise<Specialties> => {
+        const data: CreateSpecialtyPayload = { ...payload };
+
+        if (file && uploader) {
+            try {
+                const uploadToCloudinaryResult = await uploader(file);
+                if (uploadToCloudinaryResult?.secure_url) {
+                    data.icon = uploadToCloudinaryResult.secure_url;
+                }
+            } catch {
+                delete data.icon;
+            }
+        }
+
+        return repository.updateById(id, data);
+    };
+
     const deleteFromDB = async (id: string): Promise<Specialties> => {
         return repository.deleteById(id);
     };
@@ -37,6 +63,7 @@ export const createSpecialtiesService = (
     return {
         inserIntoDB,
         getAllFromDB,
+        updateIntoDB,
         deleteFromDB,
     };
 };

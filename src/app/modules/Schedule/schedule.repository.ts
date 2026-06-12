@@ -61,6 +61,15 @@ const findById = async (id: string): Promise<Schedule | null> => {
     });
 };
 
+const updateById = async (id: string, data: Prisma.ScheduleUpdateInput): Promise<Schedule> => {
+    return prisma.schedule.update({
+        where: {
+            id,
+        },
+        data,
+    });
+};
+
 const deleteById = async (id: string): Promise<Schedule> => {
     return prisma.schedule.delete({
         where: {
@@ -76,5 +85,6 @@ export const ScheduleRepository = {
     findMany,
     count,
     findById,
+    updateById,
     deleteById,
 };

@@ -15,9 +15,11 @@ const specialty = (overrides: Partial<Specialties> = {}): Specialties => ({
 const createRepository = () => {
     const calls: {
         create: CreateSpecialtyPayload[];
+        updateById: Array<{ id: string; data: CreateSpecialtyPayload }>;
         deleteById: string[];
     } = {
         create: [],
+        updateById: [],
         deleteById: [],
     };
 
@@ -30,6 +32,10 @@ const createRepository = () => {
         },
         async findAll() {
             return rows;
+        },
+        async updateById(id, data) {
+            calls.updateById.push({ id, data });
+            return specialty({ id, ...data });
         },
         async deleteById(id) {
             calls.deleteById.push(id);
@@ -48,7 +54,7 @@ test("SpecialtiesService creates a specialty without uploading when no file is p
 
     const result = await service.inserIntoDB({ title: "Cardiology" });
 
-    assert.deepEqual(calls.create, [{ title: "Cardiology" }]);
+    assert.deepEqual(calls.create, [{ title: "Cardiology", icon: "" }]);
     assert.equal(result.title, "Cardiology");
 });
 
@@ -75,6 +81,18 @@ test("SpecialtiesService reads all specialties through the repository", async ()
     const result = await service.getAllFromDB();
 
     assert.equal(result, rows);
+});
+
+test("SpecialtiesService updates a specialty through the repository", async () => {
+    const { calls, repository } = createRepository();
+    const service = createSpecialtiesService(repository);
+
+    const result = await service.updateIntoDB("specialty-1", { title: "Dental" });
+
+    assert.deepEqual(calls.updateById, [
+        { id: "specialty-1", data: { title: "Dental" } },
+    ]);
+    assert.equal(result.title, "Dental");
 });
 
 test("SpecialtiesService deletes a specialty through the repository", async () => {

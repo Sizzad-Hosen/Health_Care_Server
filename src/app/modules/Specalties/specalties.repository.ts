@@ -12,6 +12,15 @@ const findAll = async (): Promise<Specialties[]> => {
     return prisma.specialties.findMany();
 };
 
+const updateById = async (id: string, data: CreateSpecialtyPayload): Promise<Specialties> => {
+    return prisma.specialties.update({
+        where: {
+            id,
+        },
+        data: data as Prisma.SpecialtiesUpdateInput,
+    });
+};
+
 const deleteById = async (id: string): Promise<Specialties> => {
     return prisma.specialties.delete({
         where: {
@@ -23,5 +32,6 @@ const deleteById = async (id: string): Promise<Specialties> => {
 export const SpecialtiesRepository = {
     create,
     findAll,
+    updateById,
     deleteById,
 };

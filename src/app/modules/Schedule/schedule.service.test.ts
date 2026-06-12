@@ -29,6 +29,7 @@ const createRepository = (existingSlots = new Set<string>()) => {
         }>;
         count: Prisma.ScheduleWhereInput[];
         findById: string[];
+        updateById: Array<{ id: string; data: Prisma.ScheduleUpdateInput }>;
         deleteById: string[];
     } = {
         createSlot: [],
@@ -36,6 +37,7 @@ const createRepository = (existingSlots = new Set<string>()) => {
         findMany: [],
         count: [],
         findById: [],
+        updateById: [],
         deleteById: [],
     };
 
@@ -69,6 +71,14 @@ const createRepository = (existingSlots = new Set<string>()) => {
         async findById(id) {
             calls.findById.push(id);
             return schedule({ id });
+        },
+        async updateById(id, data) {
+            calls.updateById.push({ id, data });
+            return schedule({
+                id,
+                startDate: data.startDate as Date,
+                endDate: data.endDate as Date,
+            });
         },
         async deleteById(id) {
             calls.deleteById.push(id);
@@ -145,6 +155,21 @@ test("ScheduleService fetches unassigned schedules with pagination metadata", as
     assert.deepEqual(calls.findMany[0].where.id, { notIn: ["booked-schedule"] });
 });
 
+test("ScheduleService fetches all schedules for admin users", async () => {
+    const { calls, repository, rows } = createRepository();
+    const service = createScheduleService(repository);
+
+    const result = await service.getAllFromDB(
+        {},
+        { page: 1, limit: 10 },
+        { email: "admin@example.com", role: UserRole.ADMIN }
+    );
+
+    assert.equal(result.data, rows);
+    assert.deepEqual(calls.findDoctorScheduleIdsByDoctorEmail, []);
+    assert.equal(calls.findMany[0].where.id, undefined);
+});
+
 test("ScheduleService delegates get and delete by id to the repository", async () => {
     const { calls, repository } = createRepository();
     const service = createScheduleService(repository);
@@ -156,4 +181,23 @@ test("ScheduleService delegates get and delete by id to the repository", async (
     assert.equal(deleted.id, "schedule-1");
     assert.deepEqual(calls.findById, ["schedule-1"]);
     assert.deepEqual(calls.deleteById, ["schedule-1"]);
+});
+
+test("ScheduleService updates a schedule slot", async () => {
+    const { calls, repository } = createRepository();
+    const service = createScheduleService(repository);
+
+    const result = await service.updateIntoDB("schedule-1", {
+        startDate: "2026-01-02",
+        endDate: "2026-01-02",
+        startTime: "10:00",
+        endTime: "10:30",
+    });
+
+    assert.equal(result.id, "schedule-1");
+    assert.equal(calls.updateById.length, 1);
+    assert.equal(calls.updateById[0].id, "schedule-1");
+    assert.equal((calls.updateById[0].data.startDate as Date).getHours(), 10);
+    assert.equal((calls.updateById[0].data.endDate as Date).getHours(), 10);
+    assert.equal((calls.updateById[0].data.endDate as Date).getMinutes(), 30);
 });

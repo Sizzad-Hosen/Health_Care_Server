@@ -24,10 +24,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+const hasCloudinaryConfig = () => {
+  return Boolean(
+    config.cloudinary_name &&
+      config.cloudinary_api_key &&
+      config.cloudinary_api_secret &&
+      config.cloudinary_name !== "change-me" &&
+      config.cloudinary_api_key !== "change-me" &&
+      config.cloudinary_api_secret !== "change-me"
+  );
+};
+
 const uploadToCloudinary = async (file: IFile): Promise<ICloudinaryResponse> => {
+  if (!hasCloudinaryConfig()) {
+    fs.rmSync(file.path, { force: true });
+    return {} as ICloudinaryResponse;
+  }
+
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(file.path, (error, result) => {
-      fs.unlinkSync(file.path);
+      fs.rmSync(file.path, { force: true });
       if (error) return reject(error);
       resolve(result as unknown as ICloudinaryResponse);
     });

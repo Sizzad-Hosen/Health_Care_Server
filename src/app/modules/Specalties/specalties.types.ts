@@ -11,6 +11,7 @@ export type SpecialtyUploadFile = IFile | undefined;
 export type SpecialtiesRepository = {
     create(data: CreateSpecialtyPayload): Promise<Specialties>;
     findAll(): Promise<Specialties[]>;
+    updateById(id: string, data: CreateSpecialtyPayload): Promise<Specialties>;
     deleteById(id: string): Promise<Specialties>;
 };
 

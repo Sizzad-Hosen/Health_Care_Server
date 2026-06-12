@@ -60,13 +60,13 @@ const getAllFromDB = async (
         andConditions.push({
             AND: [
                 {
-                    startDateTime: {
-                        gte: startDate
+                    startDate: {
+                        gte: new Date(startDate)
                     }
                 },
                 {
-                    endDateTime: {
-                        lte: endDate
+                    endDate: {
+                        lte: new Date(endDate)
                     }
                 }
             ]
@@ -89,14 +89,19 @@ const getAllFromDB = async (
     const whereConditions: Prisma.ScheduleWhereInput =
         andConditions.length > 0 ? { AND: andConditions } : {};
 
-    const doctorScheduleIds = await repository.findDoctorScheduleIdsByDoctorEmail(user?.email);
-    console.log(doctorScheduleIds)
+    const doctorScheduleIds = user?.email && user?.role === 'DOCTOR'
+        ? await repository.findDoctorScheduleIdsByDoctorEmail(user.email)
+        : [];
 
     const queryWhere = {
         ...whereConditions,
-        id: {
-            notIn: doctorScheduleIds
-        },
+        ...(doctorScheduleIds.length > 0
+            ? {
+                id: {
+                    notIn: doctorScheduleIds
+                },
+            }
+            : {}),
     };
     const orderBy: Prisma.ScheduleOrderByWithRelationInput = options.sortBy && options.sortOrder
         ? { [options.sortBy]: options.sortOrder as Prisma.SortOrder }
@@ -123,6 +128,31 @@ const getByIdFromDB = async (id: string): Promise<Schedule | null> => {
     return result;
 };
 
+const updateIntoDB = async (
+    id: string,
+    payload: { startDate: string; endDate: string; startTime: string; endTime: string }
+): Promise<Schedule> => {
+    const startDay = format(new Date(payload.startDate), 'yyyy-MM-dd');
+    const endDay = format(new Date(payload.endDate), 'yyyy-MM-dd');
+    const startDate = new Date(`${startDay}T${payload.startTime}:00`);
+    const endDate = new Date(`${endDay}T${payload.endTime}:00`);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+        throw new Error("Invalid schedule date or time");
+    }
+
+    if (startDate >= endDate) {
+        throw new Error("Schedule end time must be after start time");
+    }
+
+    const result = await repository.updateById(id, {
+        startDate,
+        endDate,
+    });
+
+    return result;
+};
+
 const deleteFromDB = async (id: string): Promise<Schedule> => {
     const result = await repository.deleteById(id);
     return result;
@@ -133,6 +163,7 @@ return {
     inserIntoDB,
     getAllFromDB,
     getByIdFromDB,
+    updateIntoDB,
     deleteFromDB
 };
 };

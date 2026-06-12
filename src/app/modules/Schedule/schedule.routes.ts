@@ -23,6 +23,11 @@ router.post(
     ScheduleController.inserIntoDB
 );
 
+router.patch(
+    '/:id',
+    // auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+    ScheduleController.updateIntoDB
+);
 
 router.delete(
     '/:id',
