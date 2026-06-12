@@ -93,6 +93,7 @@ const updateByIdDB = async(id:string,data: Partial<Admin>)=>{
         data:data
     })
 
+    return result;
 }
 const deleteByIdFromDB = async(id:string)=>{
 
@@ -120,6 +121,7 @@ const deleteByIdFromDB = async(id:string)=>{
 
     })
 
+    return result;
 
 }
 const softDeleteByIdFromDB = async(id:string)=>{
@@ -154,6 +156,7 @@ const softDeleteByIdFromDB = async(id:string)=>{
 
     })
 
+    return result;
 
 }
 
